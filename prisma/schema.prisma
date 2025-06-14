@@ -1,0 +1,154 @@
+// Updated schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  members   Member[]
+  comments  Comment[]
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id        String    @id @default(cuid())
+  name      String
+  members   Member[]
+  tasks     Task[]
+  meetings  Meeting[]
+  tags      Tag[]
+  invites   Invite[]
+  createdAt DateTime  @default(now())
+}
+
+model Member {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  projectId     String
+  project       Project    @relation(fields: [projectId], references: [id])
+  role          Role       @default(MEMBER)
+  tasksAssigned Task[]     @relation("AssignedTasks")
+  subtasksAssigned Subtask[] @relation("AssignedSubtasks")
+  createdAt     DateTime   @default(now())
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id])
+
+  title         String
+  description   String
+  priority      TaskPriority @default(MEDIUM)
+  status        TaskStatus   @default(TODO)
+  dueDate       DateTime?
+
+  assigneeId    String?
+  assignee      Member?   @relation("AssignedTasks", fields: [assigneeId], references: [id])
+
+  subtasks      Subtask[]
+  comments      Comment[]
+  attachments   Attachment[]
+  tags          TaskTag[]
+  createdAt     DateTime  @default(now())
+}
+
+model Subtask {
+  id         String   @id @default(cuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  title      String
+  completed  Boolean  @default(false)
+  
+  assigneeId String?
+  assignee   Member?  @relation("AssignedSubtasks", fields: [assigneeId], references: [id])
+  
+  createdAt  DateTime @default(now())
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  url       String
+  fileName  String
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Meeting {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  title      String
+  datetime   DateTime
+  createdAt  DateTime @default(now())
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  taskTags  TaskTag[]
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+  task   Task @relation(fields: [taskId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
+
+  @@id([taskId, tagId])
+}
+
+model Invite {
+  id         String   @id @default(cuid())
+  email      String
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  role       Role     @default(MEMBER)
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BACKLOG
+}
