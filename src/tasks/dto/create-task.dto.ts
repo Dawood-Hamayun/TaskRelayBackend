@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsEnum, IsString, IsDateString } from 'class-validator';
+// backend/src/tasks/dto/create-task.dto.ts - FIXED
+import { IsNotEmpty, IsOptional, IsEnum, IsString, IsDateString, IsArray } from 'class-validator';
 
 export enum TaskStatus {
   TODO = 'TODO',
@@ -34,7 +35,7 @@ export class CreateTaskDto {
 
   @IsOptional()
   @IsDateString()
-  dueDate?: Date;
+  dueDate?: string;
 
   @IsOptional()
   @IsString()
@@ -43,4 +44,10 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   parentTaskId?: string;
+
+  // ADD THIS - Support for tags in task creation
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 }

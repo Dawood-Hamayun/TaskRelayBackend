@@ -8,15 +8,15 @@ export declare class SubtasksController {
             user: {
                 id: string;
                 email: string;
-                createdAt: Date;
-                name: string | null;
                 password: string;
+                name: string | null;
+                createdAt: Date;
             };
         } & {
             id: string;
+            createdAt: Date;
             projectId: string;
             role: import("@prisma/client").$Enums.Role;
-            createdAt: Date;
             userId: string;
         };
     } & {
@@ -24,6 +24,7 @@ export declare class SubtasksController {
         createdAt: Date;
         title: string;
         assigneeId: string | null;
+        updatedAt: Date;
         taskId: string;
         completed: boolean;
     }>;
@@ -32,15 +33,15 @@ export declare class SubtasksController {
             user: {
                 id: string;
                 email: string;
-                createdAt: Date;
-                name: string | null;
                 password: string;
+                name: string | null;
+                createdAt: Date;
             };
         } & {
             id: string;
+            createdAt: Date;
             projectId: string;
             role: import("@prisma/client").$Enums.Role;
-            createdAt: Date;
             userId: string;
         };
     } & {
@@ -48,6 +49,7 @@ export declare class SubtasksController {
         createdAt: Date;
         title: string;
         assigneeId: string | null;
+        updatedAt: Date;
         taskId: string;
         completed: boolean;
     })[]>;
@@ -56,15 +58,15 @@ export declare class SubtasksController {
             user: {
                 id: string;
                 email: string;
-                createdAt: Date;
-                name: string | null;
                 password: string;
+                name: string | null;
+                createdAt: Date;
             };
         } & {
             id: string;
+            createdAt: Date;
             projectId: string;
             role: import("@prisma/client").$Enums.Role;
-            createdAt: Date;
             userId: string;
         };
     } & {
@@ -72,6 +74,7 @@ export declare class SubtasksController {
         createdAt: Date;
         title: string;
         assigneeId: string | null;
+        updatedAt: Date;
         taskId: string;
         completed: boolean;
     }>;

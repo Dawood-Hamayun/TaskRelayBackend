@@ -5,26 +5,30 @@ export declare class TagsService {
     constructor(prisma: PrismaService);
     create(projectId: string, dto: CreateTagDto): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }>;
     findAll(projectId: string): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }[]>;
     update(tagId: string, dto: Partial<CreateTagDto>): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }>;
     delete(tagId: string): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }>;
 }

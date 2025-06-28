@@ -1,4 +1,4 @@
-// Updated schema.prisma
+// backend/src/prisma/schema.prisma - Complete Updated Schema
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,42 +9,48 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  members   Member[]
-  comments  Comment[]
-  createdAt DateTime @default(now())
+  id              String            @id @default(cuid())
+  email           String            @unique
+  password        String
+  name            String?
+  members         Member[]
+  comments        Comment[]
+  sentInvites     Invite[]          @relation("SentInvites")
+  createdMeetings Meeting[]         @relation("CreatedMeetings")
+  meetingAttendees MeetingAttendee[]
+  createdAt       DateTime          @default(now())
 }
 
 model Project {
-  id        String    @id @default(cuid())
-  name      String
-  members   Member[]
-  tasks     Task[]
-  meetings  Meeting[]
-  tags      Tag[]
-  invites   Invite[]
-  createdAt DateTime  @default(now())
+  id          String    @id @default(cuid())
+  name        String
+  description String?   // Enhanced: Added description field
+  members     Member[]
+  tasks       Task[]
+  meetings    Meeting[] // Enhanced: Added meetings relation
+  tags        Tag[]
+  invites     Invite[]
+  createdAt   DateTime  @default(now())
 }
 
 model Member {
   id            String     @id @default(cuid())
   userId        String
-  user          User       @relation(fields: [userId], references: [id])
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId     String
-  project       Project    @relation(fields: [projectId], references: [id])
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   role          Role       @default(MEMBER)
   tasksAssigned Task[]     @relation("AssignedTasks")
   subtasksAssigned Subtask[] @relation("AssignedSubtasks")
   createdAt     DateTime   @default(now())
+
+  @@unique([userId, projectId])
 }
 
 model Task {
   id            String    @id @default(cuid())
   projectId     String
-  project       Project   @relation(fields: [projectId], references: [id])
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   title         String
   description   String
@@ -53,13 +59,14 @@ model Task {
   dueDate       DateTime?
 
   assigneeId    String?
-  assignee      Member?   @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  assignee      Member?   @relation("AssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
 
   subtasks      Subtask[]
   comments      Comment[]
   attachments   Attachment[]
   tags          TaskTag[]
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Subtask {
@@ -71,37 +78,71 @@ model Subtask {
   completed  Boolean  @default(false)
   
   assigneeId String?
-  assignee   Member?  @relation("AssignedSubtasks", fields: [assigneeId], references: [id])
+  assignee   Member?  @relation("AssignedSubtasks", fields: [assigneeId], references: [id], onDelete: SetNull)
   
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Comment {
   id         String   @id @default(cuid())
   content    String
   authorId   String
-  author     User     @relation(fields: [authorId], references: [id])
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   taskId     String
-  task       Task     @relation(fields: [taskId], references: [id])
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Attachment {
   id        String   @id @default(cuid())
   url       String
   fileName  String
+  fileSize  Int?
+  mimeType  String?
   taskId    String
-  task      Task     @relation(fields: [taskId], references: [id])
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
+// Enhanced: Complete Meeting model
 model Meeting {
-  id         String   @id @default(cuid())
-  projectId  String
-  project    Project  @relation(fields: [projectId], references: [id])
-  title      String
-  datetime   DateTime
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  datetime    DateTime
+  duration    Int      @default(60) // in minutes
+  location    String?
+  meetingUrl  String?  // For virtual meetings
+  
+  createdBy   String
+  creator     User     @relation("CreatedMeetings", fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  attendees   MeetingAttendee[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId, datetime])
+  @@index([createdBy])
+}
+
+// Enhanced: Meeting attendee model
+model MeetingAttendee {
+  id        String         @id @default(cuid())
+  meetingId String
+  meeting   Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    AttendeeStatus @default(PENDING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([meetingId, userId])
+  @@index([userId])
 }
 
 model Tag {
@@ -109,26 +150,39 @@ model Tag {
   name      String
   color     String
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   taskTags  TaskTag[]
+  createdAt DateTime @default(now())
+
+  @@unique([name, projectId])
 }
 
 model TaskTag {
   taskId String
   tagId  String
-  task   Task @relation(fields: [taskId], references: [id])
-  tag    Tag  @relation(fields: [tagId], references: [id])
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([taskId, tagId])
 }
 
 model Invite {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   email      String
   projectId  String
-  project    Project  @relation(fields: [projectId], references: [id])
-  role       Role     @default(MEMBER)
-  createdAt  DateTime @default(now())
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role       Role        @default(MEMBER)
+  token      String      @unique  // For secure invite links
+  status     InviteStatus @default(PENDING)
+  invitedBy  String      // Track who sent invite
+  inviter    User        @relation("SentInvites", fields: [invitedBy], references: [id], onDelete: Cascade)
+  message    String?     // Optional personal message
+  expiresAt  DateTime    // Invite expiration
+  createdAt  DateTime    @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@index([projectId])
 }
 
 enum Role {
@@ -151,4 +205,19 @@ enum TaskStatus {
   IN_REVIEW
   DONE
   BACKLOG
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED  
+  DECLINED
+  EXPIRED
+}
+
+// Enhanced: Meeting attendee status enum
+enum AttendeeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  TENTATIVE
 }

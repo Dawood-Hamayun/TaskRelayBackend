@@ -5,8 +5,8 @@ export declare class UsersController {
     getAllUsers(req: any): Promise<{
         id: string;
         email: string;
-        createdAt: Date;
-        name: string | null;
         password: string;
+        name: string | null;
+        createdAt: Date;
     }[]>;
 }

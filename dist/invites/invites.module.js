@@ -10,13 +10,15 @@ exports.InvitesModule = void 0;
 const common_1 = require("@nestjs/common");
 const invites_service_1 = require("./invites.service");
 const invites_controller_1 = require("./invites.controller");
+const email_module_1 = require("../email/email.module");
 let InvitesModule = class InvitesModule {
 };
 exports.InvitesModule = InvitesModule;
 exports.InvitesModule = InvitesModule = __decorate([
     (0, common_1.Module)({
-        providers: [invites_service_1.InvitesService],
+        imports: [email_module_1.EmailModule],
         controllers: [invites_controller_1.InvitesController],
+        providers: [invites_service_1.InvitesService],
         exports: [invites_service_1.InvitesService],
     })
 ], InvitesModule);

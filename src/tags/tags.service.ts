@@ -19,25 +19,25 @@ export class TagsService {
   async findAll(projectId: string) {
     return this.prisma.tag.findMany({
       where: { projectId },
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
     });
   }
 
   async update(tagId: string, dto: Partial<CreateTagDto>) {
     return this.prisma.tag.update({
       where: { id: tagId },
-      data: dto
+      data: dto,
     });
   }
 
   async delete(tagId: string) {
     // First remove tag associations
     await this.prisma.taskTag.deleteMany({
-      where: { tagId }
+      where: { tagId },
     });
 
     return this.prisma.tag.delete({
-      where: { id: tagId }
+      where: { id: tagId },
     });
   }
 }

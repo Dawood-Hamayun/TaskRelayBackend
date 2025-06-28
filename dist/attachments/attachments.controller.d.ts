@@ -9,6 +9,8 @@ export declare class AttachmentsController {
         taskId: string;
         url: string;
         fileName: string;
+        fileSize: number | null;
+        mimeType: string | null;
     }>;
     getTaskAttachments(taskId: string): Promise<{
         id: string;
@@ -16,5 +18,7 @@ export declare class AttachmentsController {
         taskId: string;
         url: string;
         fileName: string;
+        fileSize: number | null;
+        mimeType: string | null;
     }[]>;
 }

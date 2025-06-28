@@ -1,7 +1,10 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+// backend/src/tags/tags.controller.ts
+import { Controller, Post, Get, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
@@ -14,5 +17,10 @@ export class TagsController {
   @Get(':projectId')
   findAll(@Param('projectId') projectId: string) {
     return this.tagsService.findAll(projectId);
+  }
+
+  @Delete(':tagId')
+  delete(@Param('tagId') tagId: string) {
+    return this.tagsService.delete(tagId);
   }
 }

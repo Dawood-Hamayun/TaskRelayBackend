@@ -16,33 +16,54 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const auth_dto_1 = require("./dto/auth.dto");
-const signup_dto_1 = require("./dto/signup.dto");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    signup(body) {
-        return this.authService.signup(body.email, body.password, body.name);
+    async signup(body, inviteToken) {
+        console.log('📝 Signup request:', {
+            email: body.email,
+            name: body.name,
+            hasInviteToken: !!inviteToken
+        });
+        return this.authService.signup(body.email, body.password, body.name, inviteToken);
     }
-    login(body) {
-        return this.authService.login(body.email, body.password);
+    async login(body, inviteToken) {
+        console.log('🔑 Login request:', {
+            email: body.email,
+            hasInviteToken: !!inviteToken
+        });
+        return this.authService.login(body.email, body.password, inviteToken);
+    }
+    async checkPendingInvites(email) {
+        console.log('📧 Checking pending invites for:', email);
+        return this.authService.checkPendingInvites(email);
     }
 };
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('signup'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Query)('inviteToken')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [signup_dto_1.SignupDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [auth_dto_1.SignupDto, String]),
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signup", null);
 __decorate([
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Query)('inviteToken')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [auth_dto_1.LoginDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [auth_dto_1.LoginDto, String]),
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Get)('check-invites/:email'),
+    __param(0, (0, common_1.Param)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "checkPendingInvites", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

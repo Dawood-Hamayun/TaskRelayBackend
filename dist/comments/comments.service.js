@@ -24,26 +24,43 @@ let CommentsService = class CommentsService {
                 taskId,
             },
             include: {
-                author: true
-            }
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
         });
     }
     async getTaskComments(taskId) {
         return this.prisma.comment.findMany({
             where: { taskId },
-            include: { author: true },
-            orderBy: { createdAt: 'desc' }
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
         });
     }
     async deleteComment(commentId, userId) {
         const comment = await this.prisma.comment.findUnique({
-            where: { id: commentId }
+            where: { id: commentId },
         });
-        if (!comment || comment.authorId !== userId) {
-            throw new Error('Unauthorized to delete this comment');
+        if (!comment) {
+            throw new common_1.NotFoundException('Comment not found');
+        }
+        if (comment.authorId !== userId) {
+            throw new common_1.ForbiddenException('You can only delete your own comments');
         }
         return this.prisma.comment.delete({
-            where: { id: commentId }
+            where: { id: commentId },
         });
     }
 };

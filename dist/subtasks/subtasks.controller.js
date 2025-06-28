@@ -36,7 +36,7 @@ let SubtasksController = class SubtasksController {
 };
 exports.SubtasksController = SubtasksController;
 __decorate([
-    (0, common_1.Post)('task/:taskId'),
+    (0, common_1.Post)(':taskId'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('taskId')),
     __param(2, (0, common_1.Body)()),
@@ -45,7 +45,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SubtasksController.prototype, "createSubtask", null);
 __decorate([
-    (0, common_1.Post)('task/:taskId/multiple'),
+    (0, common_1.Post)(':taskId/multiple'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('taskId')),
     __param(2, (0, common_1.Body)()),

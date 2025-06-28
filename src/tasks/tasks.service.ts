@@ -1,4 +1,4 @@
-// tasks/tasks.service.ts
+// backend/src/tasks/tasks.service.ts - COMPLETE VERSION
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TasksGateway } from './tasks.gateway';
@@ -33,6 +33,7 @@ export class TasksService {
       }
     }
 
+    // Create the task first
     const task = await this.prisma.task.create({
       data: {
         projectId,
@@ -43,24 +44,38 @@ export class TasksService {
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         assigneeId: data.assigneeId,
       },
-      include: {
-        assignee: { include: { user: true } },
-        tags: { include: { tag: true } },
-        comments: { include: { author: true } },
-        attachments: true,
-        subtasks: {
-          include: {
-            assignee: { include: { user: true } },
-          }
-        },
-        project: true,
-      },
     });
 
+    // Handle tags if provided
+    if (data.tags && data.tags.length > 0) {
+      // Verify all tags belong to the project
+      const validTags = await this.prisma.tag.findMany({
+        where: {
+          id: { in: data.tags },
+          projectId,
+        },
+      });
+
+      if (validTags.length !== data.tags.length) {
+        throw new NotFoundException('One or more tags not found in this project');
+      }
+
+      // Create tag associations
+      await this.prisma.taskTag.createMany({
+        data: data.tags.map(tagId => ({
+          taskId: task.id,
+          tagId,
+        })),
+      });
+    }
+
+    // Return the complete task with all relations
+    const completeTask = await this.getTaskById(task.id);
+
     // Emit socket event for real-time updates
-    this.gateway.emitTaskCreated(task);
+    this.gateway.emitTaskCreated(completeTask);
     
-    return task;
+    return completeTask;
   }
 
   async getProjectTasks(projectId: string) {
@@ -68,15 +83,30 @@ export class TasksService {
       where: { projectId },
       include: {
         assignee: { include: { user: true } },
-        tags: { include: { tag: true } },
-        comments: { include: { author: true } },
-        attachments: true,
+        project: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'desc' }
+        },
+        tags: { 
+          include: { 
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                color: true,
+                projectId: true
+              }
+            }
+          }
+        },
         subtasks: {
           include: {
             assignee: { include: { user: true } },
-          }
+          },
+          orderBy: { createdAt: 'asc' }
         },
-        project: true,
+        attachments: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -89,15 +119,30 @@ export class TasksService {
       where: { id: taskId },
       include: {
         assignee: { include: { user: true } },
-        tags: { include: { tag: true } },
-        comments: { include: { author: true } },
-        attachments: true,
+        project: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'desc' }
+        },
+        tags: { 
+          include: { 
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                color: true,
+                projectId: true
+              }
+            }
+          }
+        },
         subtasks: {
           include: {
             assignee: { include: { user: true } },
-          }
+          },
+          orderBy: { createdAt: 'asc' }
         },
-        project: true,
+        attachments: true,
       },
     });
 
@@ -139,30 +184,54 @@ export class TasksService {
       }
     }
 
+    // Handle tags update
+    if (data.tags !== undefined) {
+      // Remove existing tag associations
+      await this.prisma.taskTag.deleteMany({
+        where: { taskId },
+      });
+
+      // Add new tag associations if any
+      if (data.tags.length > 0) {
+        // Verify all tags belong to the project
+        const validTags = await this.prisma.tag.findMany({
+          where: {
+            id: { in: data.tags },
+            projectId: existingTask.projectId,
+          },
+        });
+
+        if (validTags.length !== data.tags.length) {
+          throw new NotFoundException('One or more tags not found in this project');
+        }
+
+        // Create new tag associations
+        await this.prisma.taskTag.createMany({
+          data: data.tags.map(tagId => ({
+            taskId,
+            tagId,
+          })),
+        });
+      }
+    }
+
+    // Update the task (excluding tags from the direct update)
+    const { tags, ...updateData } = data;
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        ...data,
-        dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-      },
-      include: {
-        assignee: { include: { user: true } },
-        tags: { include: { tag: true } },
-        comments: { include: { author: true } },
-        attachments: true,
-        subtasks: {
-          include: {
-            assignee: { include: { user: true } },
-          }
-        },
-        project: true,
+        ...updateData,
+        dueDate: updateData.dueDate ? new Date(updateData.dueDate) : undefined,
       },
     });
 
+    // Get the complete updated task with all relations
+    const completeUpdatedTask = await this.getTaskById(taskId);
+
     // Emit socket event for real-time updates
-    this.gateway.emitTaskUpdated(updatedTask);
+    this.gateway.emitTaskUpdated(completeUpdatedTask);
     
-    return updatedTask;
+    return completeUpdatedTask;
   }
 
   async deleteTask(userId: string, taskId: string) {
@@ -171,7 +240,7 @@ export class TasksService {
       where: { id: taskId },
       include: { 
         project: true,
-        subtasks: true // Subtasks will cascade delete automatically
+        subtasks: true
       },
     });
 
@@ -187,6 +256,11 @@ export class TasksService {
     if (!member) {
       throw new ForbiddenException('You are not a member of this project');
     }
+
+    // Delete task tags first (cascade should handle this, but being explicit)
+    await this.prisma.taskTag.deleteMany({
+      where: { taskId },
+    });
 
     // Delete the task (subtasks will cascade delete due to onDelete: Cascade in schema)
     await this.prisma.task.delete({ 

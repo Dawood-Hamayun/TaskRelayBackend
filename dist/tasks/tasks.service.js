@@ -43,36 +43,57 @@ let TasksService = class TasksService {
                 dueDate: data.dueDate ? new Date(data.dueDate) : null,
                 assigneeId: data.assigneeId,
             },
-            include: {
-                assignee: { include: { user: true } },
-                tags: { include: { tag: true } },
-                comments: { include: { author: true } },
-                attachments: true,
-                subtasks: {
-                    include: {
-                        assignee: { include: { user: true } },
-                    }
-                },
-                project: true,
-            },
         });
-        this.gateway.emitTaskCreated(task);
-        return task;
+        if (data.tags && data.tags.length > 0) {
+            const validTags = await this.prisma.tag.findMany({
+                where: {
+                    id: { in: data.tags },
+                    projectId,
+                },
+            });
+            if (validTags.length !== data.tags.length) {
+                throw new common_1.NotFoundException('One or more tags not found in this project');
+            }
+            await this.prisma.taskTag.createMany({
+                data: data.tags.map(tagId => ({
+                    taskId: task.id,
+                    tagId,
+                })),
+            });
+        }
+        const completeTask = await this.getTaskById(task.id);
+        this.gateway.emitTaskCreated(completeTask);
+        return completeTask;
     }
     async getProjectTasks(projectId) {
         const tasks = await this.prisma.task.findMany({
             where: { projectId },
             include: {
                 assignee: { include: { user: true } },
-                tags: { include: { tag: true } },
-                comments: { include: { author: true } },
-                attachments: true,
+                project: true,
+                comments: {
+                    include: { author: true },
+                    orderBy: { createdAt: 'desc' }
+                },
+                tags: {
+                    include: {
+                        tag: {
+                            select: {
+                                id: true,
+                                name: true,
+                                color: true,
+                                projectId: true
+                            }
+                        }
+                    }
+                },
                 subtasks: {
                     include: {
                         assignee: { include: { user: true } },
-                    }
+                    },
+                    orderBy: { createdAt: 'asc' }
                 },
-                project: true,
+                attachments: true,
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -83,15 +104,30 @@ let TasksService = class TasksService {
             where: { id: taskId },
             include: {
                 assignee: { include: { user: true } },
-                tags: { include: { tag: true } },
-                comments: { include: { author: true } },
-                attachments: true,
+                project: true,
+                comments: {
+                    include: { author: true },
+                    orderBy: { createdAt: 'desc' }
+                },
+                tags: {
+                    include: {
+                        tag: {
+                            select: {
+                                id: true,
+                                name: true,
+                                color: true,
+                                projectId: true
+                            }
+                        }
+                    }
+                },
                 subtasks: {
                     include: {
                         assignee: { include: { user: true } },
-                    }
+                    },
+                    orderBy: { createdAt: 'asc' }
                 },
-                project: true,
+                attachments: true,
             },
         });
         if (!task) {
@@ -121,27 +157,39 @@ let TasksService = class TasksService {
                 throw new common_1.NotFoundException('Assignee not found in this project');
             }
         }
+        if (data.tags !== undefined) {
+            await this.prisma.taskTag.deleteMany({
+                where: { taskId },
+            });
+            if (data.tags.length > 0) {
+                const validTags = await this.prisma.tag.findMany({
+                    where: {
+                        id: { in: data.tags },
+                        projectId: existingTask.projectId,
+                    },
+                });
+                if (validTags.length !== data.tags.length) {
+                    throw new common_1.NotFoundException('One or more tags not found in this project');
+                }
+                await this.prisma.taskTag.createMany({
+                    data: data.tags.map(tagId => ({
+                        taskId,
+                        tagId,
+                    })),
+                });
+            }
+        }
+        const { tags, ...updateData } = data;
         const updatedTask = await this.prisma.task.update({
             where: { id: taskId },
             data: {
-                ...data,
-                dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-            },
-            include: {
-                assignee: { include: { user: true } },
-                tags: { include: { tag: true } },
-                comments: { include: { author: true } },
-                attachments: true,
-                subtasks: {
-                    include: {
-                        assignee: { include: { user: true } },
-                    }
-                },
-                project: true,
+                ...updateData,
+                dueDate: updateData.dueDate ? new Date(updateData.dueDate) : undefined,
             },
         });
-        this.gateway.emitTaskUpdated(updatedTask);
-        return updatedTask;
+        const completeUpdatedTask = await this.getTaskById(taskId);
+        this.gateway.emitTaskUpdated(completeUpdatedTask);
+        return completeUpdatedTask;
     }
     async deleteTask(userId, taskId) {
         const existingTask = await this.prisma.task.findUnique({
@@ -160,6 +208,9 @@ let TasksService = class TasksService {
         if (!member) {
             throw new common_1.ForbiddenException('You are not a member of this project');
         }
+        await this.prisma.taskTag.deleteMany({
+            where: { taskId },
+        });
         await this.prisma.task.delete({
             where: { id: taskId }
         });
