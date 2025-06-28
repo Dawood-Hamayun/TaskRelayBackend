@@ -6,13 +6,12 @@ export declare class CommentsService {
         author: {
             id: string;
             email: string;
-            createdAt: Date;
-            name: string | null;
-            password: string;
+            name: string;
         };
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;
@@ -21,13 +20,12 @@ export declare class CommentsService {
         author: {
             id: string;
             email: string;
-            createdAt: Date;
-            name: string | null;
-            password: string;
+            name: string;
         };
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;
@@ -35,6 +33,7 @@ export declare class CommentsService {
     deleteComment(commentId: string, userId: string): Promise<{
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;

@@ -19,7 +19,7 @@ exports.MembersModule = MembersModule = __decorate([
         imports: [prisma_module_1.PrismaModule],
         controllers: [members_controller_1.MembersController],
         providers: [members_service_1.MembersService],
-        exports: [members_service_1.MembersService]
+        exports: [members_service_1.MembersService],
     })
 ], MembersModule);
 //# sourceMappingURL=members.module.js.map

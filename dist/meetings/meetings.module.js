@@ -10,13 +10,16 @@ exports.MeetingsModule = void 0;
 const common_1 = require("@nestjs/common");
 const meetings_service_1 = require("./meetings.service");
 const meetings_controller_1 = require("./meetings.controller");
+const prisma_module_1 = require("../prisma/prisma.module");
 let MeetingsModule = class MeetingsModule {
 };
 exports.MeetingsModule = MeetingsModule;
 exports.MeetingsModule = MeetingsModule = __decorate([
     (0, common_1.Module)({
+        imports: [prisma_module_1.PrismaModule],
+        controllers: [meetings_controller_1.MeetingsController],
         providers: [meetings_service_1.MeetingsService],
-        controllers: [meetings_controller_1.MeetingsController]
+        exports: [meetings_service_1.MeetingsService],
     })
 ], MeetingsModule);
 //# sourceMappingURL=meetings.module.js.map

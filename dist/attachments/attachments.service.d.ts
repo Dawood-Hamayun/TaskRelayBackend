@@ -8,6 +8,8 @@ export declare class AttachmentsService {
         taskId: string;
         url: string;
         fileName: string;
+        fileSize: number | null;
+        mimeType: string | null;
     }>;
     getTaskAttachments(taskId: string): Promise<{
         id: string;
@@ -15,5 +17,7 @@ export declare class AttachmentsService {
         taskId: string;
         url: string;
         fileName: string;
+        fileSize: number | null;
+        mimeType: string | null;
     }[]>;
 }

@@ -5,14 +5,23 @@ export declare class TagsController {
     constructor(tagsService: TagsService);
     create(projectId: string, dto: CreateTagDto): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }>;
     findAll(projectId: string): Promise<{
         id: string;
-        projectId: string;
         name: string;
+        createdAt: Date;
+        projectId: string;
         color: string;
     }[]>;
+    delete(tagId: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        projectId: string;
+        color: string;
+    }>;
 }

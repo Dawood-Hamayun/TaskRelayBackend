@@ -1,4 +1,4 @@
-// tasks/tasks.controller.ts
+// backend/src/tasks/tasks.controller.ts - FIXED (remove the problematic endpoint)
 import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

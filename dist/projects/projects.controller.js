@@ -16,36 +16,25 @@ exports.ProjectsController = void 0;
 const common_1 = require("@nestjs/common");
 const projects_service_1 = require("./projects.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
-const create_project_dto_1 = require("./dto/create-project.dto");
+const project_dto_1 = require("./dto/project.dto");
 let ProjectsController = class ProjectsController {
     constructor(projectsService) {
         this.projectsService = projectsService;
     }
     async getProjects(req) {
-        console.log('Getting projects for user:', req.user);
-        try {
-            return await this.projectsService.getUserProjects(req.user.userId);
-        }
-        catch (error) {
-            console.error('Error getting projects:', error);
-            throw error;
-        }
+        return await this.projectsService.getUserProjects(req.user.userId);
     }
-    async createProject(req, body) {
-        console.log('Create Project Request:', {
-            body,
-            user: req.user,
-            userId: req.user?.userId
-        });
-        try {
-            const project = await this.projectsService.createProject(req.user.userId, body.name);
-            console.log('Project created successfully:', project);
-            return project;
-        }
-        catch (error) {
-            console.error('Error creating project:', error);
-            throw error;
-        }
+    async getProject(id, req) {
+        return await this.projectsService.getProjectById(id, req.user.userId);
+    }
+    async createProject(req, createProjectDto) {
+        return await this.projectsService.createProject(req.user.userId, createProjectDto.name, createProjectDto.description);
+    }
+    async updateProject(id, req, updateProjectDto) {
+        return await this.projectsService.updateProject(id, req.user.userId, updateProjectDto);
+    }
+    async deleteProject(id, req) {
+        return await this.projectsService.deleteProject(id, req.user.userId);
     }
 };
 exports.ProjectsController = ProjectsController;
@@ -57,13 +46,40 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "getProjects", null);
 __decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "getProject", null);
+__decorate([
     (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_project_dto_1.CreateProjectDto]),
+    __metadata("design:paramtypes", [Object, project_dto_1.CreateProjectDto]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "createProject", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, project_dto_1.UpdateProjectDto]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "updateProject", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "deleteProject", null);
 exports.ProjectsController = ProjectsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('projects'),

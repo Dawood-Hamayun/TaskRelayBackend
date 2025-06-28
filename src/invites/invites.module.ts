@@ -1,10 +1,13 @@
+// backend/src/invites/invites.module.ts - Updated
 import { Module } from '@nestjs/common';
 import { InvitesService } from './invites.service';
 import { InvitesController } from './invites.controller';
+import { EmailModule } from '../email/email.module';
 
 @Module({
-  providers: [InvitesService],
+  imports: [EmailModule],
   controllers: [InvitesController],
-  exports: [InvitesService],  // <- export here
+  providers: [InvitesService],
+  exports: [InvitesService],
 })
 export class InvitesModule {}

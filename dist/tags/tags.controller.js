@@ -16,6 +16,7 @@ exports.TagsController = void 0;
 const common_1 = require("@nestjs/common");
 const tags_service_1 = require("./tags.service");
 const create_tag_dto_1 = require("./dto/create-tag.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let TagsController = class TagsController {
     constructor(tagsService) {
         this.tagsService = tagsService;
@@ -25,6 +26,9 @@ let TagsController = class TagsController {
     }
     findAll(projectId) {
         return this.tagsService.findAll(projectId);
+    }
+    delete(tagId) {
+        return this.tagsService.delete(tagId);
     }
 };
 exports.TagsController = TagsController;
@@ -43,7 +47,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TagsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Delete)(':tagId'),
+    __param(0, (0, common_1.Param)('tagId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TagsController.prototype, "delete", null);
 exports.TagsController = TagsController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('tags'),
     __metadata("design:paramtypes", [tags_service_1.TagsService])
 ], TagsController);

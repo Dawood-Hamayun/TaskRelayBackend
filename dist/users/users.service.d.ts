@@ -5,8 +5,8 @@ export declare class UsersService {
     getAllUsers(): Promise<{
         id: string;
         email: string;
-        createdAt: Date;
-        name: string | null;
         password: string;
+        name: string | null;
+        createdAt: Date;
     }[]>;
 }

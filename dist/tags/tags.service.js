@@ -27,21 +27,21 @@ let TagsService = class TagsService {
     async findAll(projectId) {
         return this.prisma.tag.findMany({
             where: { projectId },
-            orderBy: { name: 'asc' }
+            orderBy: { name: 'asc' },
         });
     }
     async update(tagId, dto) {
         return this.prisma.tag.update({
             where: { id: tagId },
-            data: dto
+            data: dto,
         });
     }
     async delete(tagId) {
         await this.prisma.taskTag.deleteMany({
-            where: { tagId }
+            where: { tagId },
         });
         return this.prisma.tag.delete({
-            where: { id: tagId }
+            where: { id: tagId },
         });
     }
 };

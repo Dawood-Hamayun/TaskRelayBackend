@@ -9,17 +9,31 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ScheduleMeetingDto = void 0;
+exports.CreateInviteDto = void 0;
 const class_validator_1 = require("class-validator");
-class ScheduleMeetingDto {
+const client_1 = require("@prisma/client");
+class CreateInviteDto {
+    constructor() {
+        this.role = 'MEMBER';
+    }
 }
-exports.ScheduleMeetingDto = ScheduleMeetingDto;
+exports.CreateInviteDto = CreateInviteDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Please provide a valid email address' }),
     __metadata("design:type", String)
-], ScheduleMeetingDto.prototype, "title", void 0);
+], CreateInviteDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsISO8601)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Project ID is required' }),
     __metadata("design:type", String)
-], ScheduleMeetingDto.prototype, "datetime", void 0);
-//# sourceMappingURL=schedule-meeting.dto.js.map
+], CreateInviteDto.prototype, "projectId", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.Role, { message: 'Invalid role specified' }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInviteDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(500, { message: 'Message must be less than 500 characters' }),
+    __metadata("design:type", String)
+], CreateInviteDto.prototype, "message", void 0);
+//# sourceMappingURL=invite.dto.js.map

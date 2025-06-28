@@ -7,13 +7,12 @@ export declare class CommentsController {
         author: {
             id: string;
             email: string;
-            createdAt: Date;
-            name: string | null;
-            password: string;
+            name: string;
         };
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;
@@ -22,13 +21,12 @@ export declare class CommentsController {
         author: {
             id: string;
             email: string;
-            createdAt: Date;
-            name: string | null;
-            password: string;
+            name: string;
         };
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;
@@ -36,6 +34,7 @@ export declare class CommentsController {
     deleteComment(req: any, commentId: string): Promise<{
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         content: string;
         authorId: string;
         taskId: string;

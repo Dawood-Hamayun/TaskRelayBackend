@@ -1,5 +1,10 @@
-import { CreateTaskDto } from './create-task.dto';
-declare const UpdateTaskDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateTaskDto>>;
-export declare class UpdateTaskDto extends UpdateTaskDto_base {
+import { TaskPriority, TaskStatus } from './create-task.dto';
+export declare class UpdateTaskDto {
+    title?: string;
+    description?: string;
+    priority?: TaskPriority;
+    status?: TaskStatus;
+    dueDate?: string;
+    assigneeId?: string;
+    tags?: string[];
 }
-export {};

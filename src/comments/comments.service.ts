@@ -1,5 +1,5 @@
 // backend/src/comments/comments.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -14,31 +14,48 @@ export class CommentsService {
         taskId,
       },
       include: {
-        author: true
-      }
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
   }
 
   async getTaskComments(taskId: string) {
     return this.prisma.comment.findMany({
       where: { taskId },
-      include: { author: true },
-      orderBy: { createdAt: 'desc' }
+      include: { 
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async deleteComment(commentId: string, userId: string) {
-    // Only allow the author to delete their comment
     const comment = await this.prisma.comment.findUnique({
-      where: { id: commentId }
+      where: { id: commentId },
     });
 
-    if (!comment || comment.authorId !== userId) {
-      throw new Error('Unauthorized to delete this comment');
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.authorId !== userId) {
+      throw new ForbiddenException('You can only delete your own comments');
     }
 
     return this.prisma.comment.delete({
-      where: { id: commentId }
+      where: { id: commentId },
     });
   }
 }

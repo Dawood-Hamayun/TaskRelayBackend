@@ -1,25 +1,122 @@
 import { InvitesService } from './invites.service';
+import { CreateInviteDto } from './dto/invite.dto';
 export declare class InvitesController {
     private readonly invitesService;
     constructor(invitesService: InvitesService);
-    createInvite(req: any, projectId: string, body: {
-        email: string;
-        role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
-    }): Promise<{
+    createInvite(req: any, createInviteDto: CreateInviteDto): Promise<{
+        message: string;
+        project: {
+            id: string;
+            name: string;
+            description: string;
+        };
+        inviter: {
+            id: string;
+            email: string;
+            name: string;
+        };
         id: string;
         email: string;
+        createdAt: Date;
         projectId: string;
         role: import("@prisma/client").$Enums.Role;
-        createdAt: Date;
+        status: import("@prisma/client").$Enums.InviteStatus;
+        invitedBy: string;
+        expiresAt: Date;
     }>;
-    acceptInvite(req: any): Promise<{
+    getInvite(token: string): Promise<{
+        project: {
+            id: string;
+            name: string;
+            description: string;
+        };
+        inviter: {
+            id: string;
+            email: string;
+            name: string;
+        };
+        email: string;
+        createdAt: Date;
+        projectId: string;
+        role: import("@prisma/client").$Enums.Role;
+        token: string;
+        status: import("@prisma/client").$Enums.InviteStatus;
+        message: string | null;
+        expiresAt: Date;
+    }>;
+    acceptInvite(token: string, req: any): Promise<{
+        message: string;
+        member: {
+            user: {
+                id: string;
+                email: string;
+                name: string;
+            };
+            project: {
+                id: string;
+                name: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            projectId: string;
+            role: import("@prisma/client").$Enums.Role;
+            userId: string;
+        };
+        project: {
+            id: string;
+            name: string;
+            description: string;
+        };
+    }>;
+    declineInvite(token: string): Promise<{
         message: string;
     }>;
-    getInvites(projectId: string): Promise<{
+    getProjectInvites(projectId: string, req: any): Promise<({
+        inviter: {
+            id: string;
+            email: string;
+            name: string;
+        };
+    } & {
         id: string;
         email: string;
+        createdAt: Date;
         projectId: string;
         role: import("@prisma/client").$Enums.Role;
-        createdAt: Date;
-    }[]>;
+        token: string;
+        status: import("@prisma/client").$Enums.InviteStatus;
+        invitedBy: string;
+        message: string | null;
+        expiresAt: Date;
+    })[]>;
+    cancelInvite(inviteId: string, req: any): Promise<{
+        message: string;
+    }>;
+    resendInvite(inviteId: string, req: any): Promise<{
+        message: string;
+        invite: {
+            project: {
+                id: string;
+                name: string;
+                description: string;
+            };
+            inviter: {
+                id: string;
+                email: string;
+                name: string;
+            };
+        } & {
+            id: string;
+            email: string;
+            createdAt: Date;
+            projectId: string;
+            role: import("@prisma/client").$Enums.Role;
+            token: string;
+            status: import("@prisma/client").$Enums.InviteStatus;
+            invitedBy: string;
+            message: string | null;
+            expiresAt: Date;
+        };
+    }>;
 }

@@ -52,7 +52,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
+    __metadata("design:type", String)
 ], CreateTaskDto.prototype, "dueDate", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
@@ -64,4 +64,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "parentTaskId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateTaskDto.prototype, "tags", void 0);
 //# sourceMappingURL=create-task.dto.js.map
