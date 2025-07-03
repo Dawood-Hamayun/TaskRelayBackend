@@ -11,17 +11,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProjectDto = exports.CreateProjectDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class CreateProjectDto {
 }
 exports.CreateProjectDto = CreateProjectDto;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Project name is required' }),
+    (0, class_validator_1.IsString)({ message: 'Project name must be a string' }),
     (0, class_validator_1.MaxLength)(100, { message: 'Project name must be less than 100 characters' }),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim() : value),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: 'Project description must be a string' }),
     (0, class_validator_1.MaxLength)(500, { message: 'Project description must be less than 500 characters' }),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim() : value),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "description", void 0);
 class UpdateProjectDto {
@@ -29,12 +34,16 @@ class UpdateProjectDto {
 exports.UpdateProjectDto = UpdateProjectDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: 'Project name must be a string' }),
     (0, class_validator_1.MaxLength)(100, { message: 'Project name must be less than 100 characters' }),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim() : value),
     __metadata("design:type", String)
 ], UpdateProjectDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: 'Project description must be a string' }),
     (0, class_validator_1.MaxLength)(500, { message: 'Project description must be less than 500 characters' }),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === 'string' ? value.trim() : value),
     __metadata("design:type", String)
 ], UpdateProjectDto.prototype, "description", void 0);
 //# sourceMappingURL=project.dto.js.map

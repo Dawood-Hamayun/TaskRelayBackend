@@ -1,4 +1,4 @@
-// backend/src/members/members.service.ts - Enhanced with better error handling
+// backend/src/members/members.service.ts - Fixed to include actual user avatars
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
@@ -41,7 +41,14 @@ export class MembersService {
     const targetMember = await this.prisma.member.findUnique({
       where: { id: memberId },
       include: {
-        user: { select: { id: true, name: true, email: true } }
+        user: { 
+          select: { 
+            id: true, 
+            name: true, 
+            email: true, 
+            avatar: true // Include actual avatar from database
+          } 
+        }
       }
     });
 
@@ -79,18 +86,22 @@ export class MembersService {
           select: {
             id: true,
             name: true,
-            email: true
+            email: true,
+            avatar: true // Include actual avatar from database
           }
         }
       }
     });
 
     this.logger.log('Member role updated successfully');
+    
+    // Return member with processed user data
     return {
       ...updatedMember,
       user: {
         ...updatedMember.user,
-        avatar: this.generateAvatar(updatedMember.user.name || updatedMember.user.email),
+        // Use actual avatar from database if available, otherwise generate fallback
+        avatar: updatedMember.user.avatar || this.generateAvatar(updatedMember.user.name || updatedMember.user.email),
         color: this.generateUserColor(updatedMember.user.id, 0)
       }
     };
@@ -112,7 +123,14 @@ export class MembersService {
     const targetMember = await this.prisma.member.findUnique({
       where: { id: memberId },
       include: {
-        user: { select: { id: true, name: true, email: true } }
+        user: { 
+          select: { 
+            id: true, 
+            name: true, 
+            email: true, 
+            avatar: true // Include actual avatar from database
+          } 
+        }
       }
     });
 
@@ -215,18 +233,22 @@ export class MembersService {
             select: {
               id: true,
               name: true,
-              email: true
+              email: true,
+              avatar: true // Include actual avatar from database
             }
           }
         }
       });
 
       this.logger.log('Ownership transferred successfully');
+      
+      // Return member with processed user data
       return {
         ...newOwner,
         user: {
           ...newOwner.user,
-          avatar: this.generateAvatar(newOwner.user.name || newOwner.user.email),
+          // Use actual avatar from database if available, otherwise generate fallback
+          avatar: newOwner.user.avatar || this.generateAvatar(newOwner.user.name || newOwner.user.email),
           color: this.generateUserColor(newOwner.user.id, 0)
         }
       };

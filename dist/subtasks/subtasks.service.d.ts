@@ -10,7 +10,9 @@ export declare class SubtasksService {
                 email: string;
                 password: string;
                 name: string | null;
+                avatar: string | null;
                 createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
@@ -22,9 +24,9 @@ export declare class SubtasksService {
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         title: string;
         assigneeId: string | null;
-        updatedAt: Date;
         taskId: string;
         completed: boolean;
     }>;
@@ -35,7 +37,9 @@ export declare class SubtasksService {
                 email: string;
                 password: string;
                 name: string | null;
+                avatar: string | null;
                 createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
@@ -47,9 +51,9 @@ export declare class SubtasksService {
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         title: string;
         assigneeId: string | null;
-        updatedAt: Date;
         taskId: string;
         completed: boolean;
     }>;
@@ -63,7 +67,9 @@ export declare class SubtasksService {
                 email: string;
                 password: string;
                 name: string | null;
+                avatar: string | null;
                 createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
@@ -75,9 +81,9 @@ export declare class SubtasksService {
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date;
         title: string;
         assigneeId: string | null;
-        updatedAt: Date;
         taskId: string;
         completed: boolean;
     })[]>;

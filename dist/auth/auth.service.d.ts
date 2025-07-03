@@ -11,6 +11,8 @@ export declare class AuthService {
             id: string;
             email: string;
             name: string;
+            avatar: string;
+            createdAt: Date;
         };
         autoAcceptedProject: {
             id: any;
@@ -24,6 +26,8 @@ export declare class AuthService {
             id: string;
             email: string;
             name: string;
+            avatar: string;
+            createdAt: Date;
         };
         autoAcceptedProject: {
             id: any;
@@ -56,4 +60,11 @@ export declare class AuthService {
         message: string | null;
         expiresAt: Date;
     })[]>;
+    validateUser(userId: string): Promise<{
+        id: string;
+        email: string;
+        name: string;
+        avatar: string;
+        createdAt: Date;
+    }>;
 }

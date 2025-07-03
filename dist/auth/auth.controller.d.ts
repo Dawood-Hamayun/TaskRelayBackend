@@ -10,6 +10,8 @@ export declare class AuthController {
             id: string;
             email: string;
             name: string;
+            avatar: string;
+            createdAt: Date;
         };
         autoAcceptedProject: {
             id: any;
@@ -23,6 +25,8 @@ export declare class AuthController {
             id: string;
             email: string;
             name: string;
+            avatar: string;
+            createdAt: Date;
         };
         autoAcceptedProject: {
             id: any;

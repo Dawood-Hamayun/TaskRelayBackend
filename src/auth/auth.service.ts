@@ -1,4 +1,4 @@
-// backend/src/auth/auth.service.ts - Enhanced with invite handling
+// backend/src/auth/auth.service.ts - Updated to return user profile data
 import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -29,7 +29,18 @@ export class AuthService {
     // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prisma.user.create({
-      data: { email, password: hashedPassword, name },
+      data: { 
+        email, 
+        password: hashedPassword, 
+        name: name || null 
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        createdAt: true,
+      }
     });
 
     console.log('✅ User created:', { userId: user.id, email: user.email });
@@ -52,7 +63,9 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        avatar: user.avatar,
+        createdAt: user.createdAt
       },
       autoAcceptedProject: validInvite ? {
         id: validInvite.project.id,
@@ -64,7 +77,18 @@ export class AuthService {
   async login(email: string, password: string, inviteToken?: string) {
     console.log('🔐 Login attempt:', { email, hasInviteToken: !!inviteToken });
 
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ 
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        password: true,
+        createdAt: true,
+      }
+    });
+    
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -91,16 +115,15 @@ export class AuthService {
       }
     }
 
+    // Return user data without password
+    const { password: _, ...userWithoutPassword } = user;
+
     return { 
       access_token,
       message: acceptedInvite 
         ? `Logged in and joined ${acceptedInvite.project.name}!`
         : 'Login successful!',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      },
+      user: userWithoutPassword,
       autoAcceptedProject: acceptedInvite ? {
         id: acceptedInvite.project.id,
         name: acceptedInvite.project.name
@@ -247,5 +270,25 @@ export class AuthService {
     });
 
     return invites;
+  }
+
+  // Validate user for JWT strategy
+  async validateUser(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        createdAt: true,
+      }
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
   }
 }

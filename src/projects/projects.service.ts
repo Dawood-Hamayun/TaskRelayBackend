@@ -1,4 +1,4 @@
-// backend/src/projects/projects.service.ts - Complete Enhanced Version
+// backend/src/projects/projects.service.ts - Fixed to include actual user avatars
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -28,7 +28,9 @@ export class ProjectsService {
                 select: {
                   id: true,
                   email: true,
-                  name: true
+                  name: true,
+                  avatar: true, // Include actual avatar from database
+                  createdAt: true
                 }
               }
             }
@@ -100,7 +102,9 @@ export class ProjectsService {
                 select: {
                   id: true,
                   email: true,
-                  name: true
+                  name: true,
+                  avatar: true, // Include actual avatar from database
+                  createdAt: true
                 }
               }
             },
@@ -191,7 +195,9 @@ export class ProjectsService {
               select: {
                 id: true,
                 email: true,
-                name: true
+                name: true,
+                avatar: true, // Include actual avatar from database
+                createdAt: true
               }
             }
           },
@@ -277,7 +283,9 @@ export class ProjectsService {
               select: {
                 id: true,
                 email: true,
-                name: true
+                name: true,
+                avatar: true, // Include actual avatar from database
+                createdAt: true
               }
             }
           }
@@ -360,15 +368,25 @@ export class ProjectsService {
     // Determine project status
     const status = this.determineProjectStatus(taskStats);
     
-    // Generate user avatars and colors
-    const membersWithAvatars = project.members.map((member: any, index: number) => ({
-      ...member,
-      user: {
-        ...member.user,
-        avatar: this.generateAvatar(member.user.name || member.user.email),
-        color: this.generateUserColor(member.user.id, index)
-      }
-    }));
+    // Process members with proper avatar handling
+    const membersWithAvatars = project.members.map((member: any, index: number) => {
+      console.log('Processing member:', {
+        id: member.user.id,
+        email: member.user.email,
+        hasAvatar: !!member.user.avatar,
+        avatarType: typeof member.user.avatar
+      });
+
+      return {
+        ...member,
+        user: {
+          ...member.user,
+          // Use actual avatar from database if available, otherwise generate fallback
+          avatar: member.user.avatar || this.generateAvatar(member.user.name || member.user.email),
+          color: this.generateUserColor(member.user.id, index)
+        }
+      };
+    });
 
     return {
       id: project.id,

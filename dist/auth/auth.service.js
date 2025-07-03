@@ -31,7 +31,18 @@ let AuthService = class AuthService {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await this.prisma.user.create({
-            data: { email, password: hashedPassword, name },
+            data: {
+                email,
+                password: hashedPassword,
+                name: name || null
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                avatar: true,
+                createdAt: true,
+            }
         });
         console.log('✅ User created:', { userId: user.id, email: user.email });
         if (validInvite) {
@@ -48,7 +59,9 @@ let AuthService = class AuthService {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name
+                name: user.name,
+                avatar: user.avatar,
+                createdAt: user.createdAt
             },
             autoAcceptedProject: validInvite ? {
                 id: validInvite.project.id,
@@ -58,7 +71,17 @@ let AuthService = class AuthService {
     }
     async login(email, password, inviteToken) {
         console.log('🔐 Login attempt:', { email, hasInviteToken: !!inviteToken });
-        const user = await this.prisma.user.findUnique({ where: { email } });
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                avatar: true,
+                password: true,
+                createdAt: true,
+            }
+        });
         if (!user)
             throw new common_1.UnauthorizedException('Invalid credentials');
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -80,16 +103,13 @@ let AuthService = class AuthService {
                 console.warn('⚠️ Could not auto-accept invite:', error.message);
             }
         }
+        const { password: _, ...userWithoutPassword } = user;
         return {
             access_token,
             message: acceptedInvite
                 ? `Logged in and joined ${acceptedInvite.project.name}!`
                 : 'Login successful!',
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name
-            },
+            user: userWithoutPassword,
             autoAcceptedProject: acceptedInvite ? {
                 id: acceptedInvite.project.id,
                 name: acceptedInvite.project.name
@@ -205,6 +225,22 @@ let AuthService = class AuthService {
             orderBy: { createdAt: 'desc' }
         });
         return invites;
+    }
+    async validateUser(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                avatar: true,
+                createdAt: true,
+            }
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('User not found');
+        }
+        return user;
     }
 };
 exports.AuthService = AuthService;

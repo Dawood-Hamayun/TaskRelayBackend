@@ -1,4 +1,4 @@
-// backend/src/prisma/schema.prisma - Complete Updated Schema
+// backend/src/prisma/schema.prisma - Enhanced with avatar field
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,24 +13,28 @@ model User {
   email           String            @unique
   password        String
   name            String?
+  avatar          String?           @db.Text  // ← IMPORTANT: Use @db.Text for PostgreSQL to allow large strings
   members         Member[]
   comments        Comment[]
   sentInvites     Invite[]          @relation("SentInvites")
   createdMeetings Meeting[]         @relation("CreatedMeetings")
   meetingAttendees MeetingAttendee[]
   createdAt       DateTime          @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Project {
   id          String    @id @default(cuid())
   name        String
-  description String?   // Enhanced: Added description field
+  description String?
   members     Member[]
   tasks       Task[]
-  meetings    Meeting[] // Enhanced: Added meetings relation
+  meetings    Meeting[]
   tags        Tag[]
   invites     Invite[]
   createdAt   DateTime  @default(now())
+  updatedAt DateTime @default(now())
+
 }
 
 model Member {
@@ -66,7 +70,7 @@ model Task {
   attachments   Attachment[]
   tags          TaskTag[]
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt DateTime @default(now())
 }
 
 model Subtask {
@@ -106,7 +110,6 @@ model Attachment {
   createdAt DateTime @default(now())
 }
 
-// Enhanced: Complete Meeting model
 model Meeting {
   id          String   @id @default(cuid())
   projectId   String
@@ -115,9 +118,9 @@ model Meeting {
   title       String
   description String?
   datetime    DateTime
-  duration    Int      @default(60) // in minutes
+  duration    Int      @default(60)
   location    String?
-  meetingUrl  String?  // For virtual meetings
+  meetingUrl  String?
   
   createdBy   String
   creator     User     @relation("CreatedMeetings", fields: [createdBy], references: [id], onDelete: Cascade)
@@ -130,7 +133,6 @@ model Meeting {
   @@index([createdBy])
 }
 
-// Enhanced: Meeting attendee model
 model MeetingAttendee {
   id        String         @id @default(cuid())
   meetingId String
@@ -172,12 +174,12 @@ model Invite {
   projectId  String
   project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   role       Role        @default(MEMBER)
-  token      String      @unique  // For secure invite links
+  token      String      @unique
   status     InviteStatus @default(PENDING)
-  invitedBy  String      // Track who sent invite
+  invitedBy  String
   inviter    User        @relation("SentInvites", fields: [invitedBy], references: [id], onDelete: Cascade)
-  message    String?     // Optional personal message
-  expiresAt  DateTime    // Invite expiration
+  message    String?
+  expiresAt  DateTime
   createdAt  DateTime    @default(now())
 
   @@index([token])
@@ -214,7 +216,6 @@ enum InviteStatus {
   EXPIRED
 }
 
-// Enhanced: Meeting attendee status enum
 enum AttendeeStatus {
   PENDING
   ACCEPTED
